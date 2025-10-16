@@ -9,15 +9,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 
+
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     @Autowired
@@ -31,7 +30,8 @@ public class AuthController {
 
     @PostMapping("/token")
     public String token(@RequestBody LoginRequest loginRequest) {
-
+        System.out.println("Username " +loginRequest.getName());
+        System.out.println("Password " + loginRequest.getPassword());
         String token = tokenService.generateToken();
 
         HttpHeaders headers = new HttpHeaders();
@@ -44,6 +44,8 @@ public class AuthController {
 
         ResponseEntity<Boolean> response = restTemplate.postForEntity(
                 completeUrl,entity, Boolean.class);
+        System.out.println("Username " +loginRequest.getName());
+        System.out.println("Password " + loginRequest.getPassword());
 
         if(Boolean.FALSE.equals(response.getBody()))
             return "Invalid username or password";
