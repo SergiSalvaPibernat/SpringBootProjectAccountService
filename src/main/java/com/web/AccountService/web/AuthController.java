@@ -1,6 +1,7 @@
 package com.web.AccountService.web;
 
 import com.web.AccountService.dao.LoginRequest;
+import com.web.AccountService.dao.Register;
 import com.web.AccountService.security.TokenService;
 import jdk.javadoc.doclet.Reporter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +40,35 @@ public class AuthController {
 
         HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest, headers);
 
+        String completeUrl = url + "validate";
+
         ResponseEntity<Boolean> response = restTemplate.postForEntity(
-                url,entity, Boolean.class);
+                completeUrl,entity, Boolean.class);
 
         if(Boolean.FALSE.equals(response.getBody()))
             return "Invalid username or password";
+
+        return token;
+    }
+
+    @PostMapping("/register")
+    public String registerToken(@RequestBody Register register) {
+
+        String token = tokenService.generateToken();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(token);
+
+        HttpEntity<Register> entity = new HttpEntity<>(register, headers);
+
+        String completeUrl = url + "validateRegister";
+
+        ResponseEntity<Boolean> response = restTemplate.postForEntity(
+                completeUrl,entity, Boolean.class);
+
+        if(Boolean.FALSE.equals(response.getBody()))
+            return "Email already used";
 
         return token;
     }
