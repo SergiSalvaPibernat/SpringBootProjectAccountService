@@ -1,16 +1,25 @@
 package com.web.AccountService.dao;
 
 public class Register {
-    String username;
+    //String username;
+    String name;
     String email;
     String password;
 
-    public String getUsername() {
+    /*public String getUsername() {
         return username;
     }
 
     public void setUsername(String username) {
         this.username = username;
+    }*/
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {

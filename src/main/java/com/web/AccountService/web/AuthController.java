@@ -25,10 +25,12 @@ public class AuthController {
     @Autowired
     RestTemplate restTemplate;
 
+    //@Value("${resource.url}")
+    //String url;
     @Value("${resource.url}")
     String url;
 
-    @PostMapping("/token")
+    /*@PostMapping("/token")
     public String token(@RequestBody LoginRequest loginRequest) {
         System.out.println("Username " +loginRequest.getName());
         System.out.println("Password " + loginRequest.getPassword());
@@ -51,9 +53,34 @@ public class AuthController {
             return "Invalid username or password";
 
         return token;
+    }*/
+    @PostMapping("/token")
+    public ResponseEntity<String> token(@RequestBody LoginRequest loginRequest) {
+        try {
+            // First validate user credentials
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest, headers);
+            String completeUrl = url + "validate";
+
+            ResponseEntity<Boolean> response = restTemplate.postForEntity(
+                    completeUrl, entity, Boolean.class);
+
+            if(Boolean.TRUE.equals(response.getBody())) {
+                // Generate token only if validation succeeds
+                String token = tokenService.generateToken();
+                return ResponseEntity.ok(token);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            }
+        } catch (Exception e) {
+            System.out.println("Error validating credentials: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Authentication failed");
+        }
     }
 
-    @PostMapping("/register")
+    /*@PostMapping("/register")
     public String registerToken(@RequestBody Register register) {
 
         String token = tokenService.generateToken();
@@ -73,6 +100,30 @@ public class AuthController {
             return "Email already used";
 
         return token;
+    }*/
+    @PostMapping("/register")
+    public ResponseEntity<String> registerToken(@RequestBody Register register) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<Register> entity = new HttpEntity<>(register, headers);
+            String completeUrl = url + "validateRegister";
+
+            ResponseEntity<Boolean> response = restTemplate.postForEntity(
+                    completeUrl, entity, Boolean.class);
+
+            if(Boolean.TRUE.equals(response.getBody())) {
+                // Generate token only if registration succeeds
+                String token = tokenService.generateToken();
+                return ResponseEntity.ok(token);
+            } else {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already used");
+            }
+        } catch (Exception e) {
+            System.out.println("Error during registration: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registration failed");
+        }
     }
 
     @GetMapping("/")

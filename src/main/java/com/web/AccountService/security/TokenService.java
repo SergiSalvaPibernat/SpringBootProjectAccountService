@@ -30,12 +30,13 @@ import com.nimbusds.jose.proc.SecurityContext;
 @Service
 public class TokenService {
 
+    //@Value("${rsa.private-key}") RSAPrivateKey privateKey;
+    //@Value("${rsa.public-key}") RSAPublicKey publicKey;
     @Value("${rsa.private-key}") RSAPrivateKey privateKey;
     @Value("${rsa.public-key}") RSAPublicKey publicKey;
 
     public String generateToken() {
         Instant now = Instant.now();
-
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
