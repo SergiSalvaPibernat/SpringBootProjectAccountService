@@ -54,8 +54,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerToken(@RequestBody Register register) {
+    public ResponseEntity<String> registerToken(@RequestBody Register register) {
 
+        System.out.println(register.toString());
         String token = tokenService.generateToken();
 
         HttpHeaders headers = new HttpHeaders();
@@ -66,13 +67,14 @@ public class AuthController {
 
         String completeUrl = url + "validateRegister";
 
+
         ResponseEntity<Boolean> response = restTemplate.postForEntity(
                 completeUrl,entity, Boolean.class);
 
         if(Boolean.FALSE.equals(response.getBody()))
-            return "Email already used";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid username or password");
 
-        return token;
+        return ResponseEntity.ok(token);
     }
 
     @GetMapping("/")
