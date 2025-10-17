@@ -16,7 +16,7 @@ import java.util.Collections;
 
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin
 public class AuthController {
 
     @Autowired
