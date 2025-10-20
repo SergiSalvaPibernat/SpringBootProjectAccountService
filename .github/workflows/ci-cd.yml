@@ -133,6 +133,7 @@ jobs:
       with:
         context: .
         push: false
+        load: true
         tags: |
           accountservice:latest
           accountservice:${{ needs.build.outputs.version }}
@@ -143,23 +144,62 @@ jobs:
     - name: Test Docker image
       run: |
         echo "Testing Docker image..."
-        # Start container in background
-        docker run -d --name test-container -p 8081:8081 accountservice:latest
-        sleep 10
         
-        # Basic health check
+        # Verify image was built
+        if ! docker images | grep accountservice; then
+          echo "❌ Docker image 'accountservice' not found locally"
+          docker images
+          exit 1
+        fi
+        
+        echo "✅ Docker image found locally"
+        docker images accountservice
+        
+        # Start container in background with health checks
+        echo "Starting container..."
+        docker run -d --name test-container -p 8081:8081 \
+          --health-cmd="curl -f http://localhost:8081/account/ || exit 1" \
+          --health-interval=30s \
+          --health-timeout=10s \
+          --health-retries=3 \
+          accountservice:latest
+        
+        # Wait for container to start and become healthy
+        echo "Waiting for container to start..."
+        sleep 15
+        
+        # Check if container is running
         if docker ps | grep test-container; then
           echo "✅ Container is running successfully"
+          echo "Container status:"
+          docker ps --filter "name=test-container"
+          echo "Container logs:"
           docker logs test-container
+          
+          # Try basic connectivity test (optional, may not work in GitHub Actions without curl)
+          echo "Testing connectivity (if possible)..."
+          if command -v curl >/dev/null 2>&1; then
+            if curl -f http://localhost:8081/account/ --connect-timeout 5 --max-time 10; then
+              echo "✅ HTTP endpoint accessible"
+            else
+              echo "⚠️ HTTP endpoint not accessible (may be normal in CI environment)"
+            fi
+          else
+            echo "ℹ️ curl not available, skipping connectivity test"
+          fi
         else
           echo "❌ Container failed to start"
-          docker logs test-container
+          echo "Container logs:"
+          docker logs test-container 2>&1 || echo "No logs available"
+          echo "Docker process list:"
+          docker ps -a
           exit 1
         fi
         
         # Cleanup
-        docker stop test-container
-        docker rm test-container
+        echo "Cleaning up..."
+        docker stop test-container || true
+        docker rm test-container || true
         
     - name: Save Docker image as artifact
       if: github.event_name != 'pull_request'
