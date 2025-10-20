@@ -51,7 +51,7 @@ jobs:
         files: build/test-results/test/*.xml
         github_token: ${{ secrets.GITHUB_TOKEN }}
         check_name: 'Test Results'
-        comment_mode: create new
+        comment_mode: always
         
     - name: Upload test results (fallback)
       if: failure()
