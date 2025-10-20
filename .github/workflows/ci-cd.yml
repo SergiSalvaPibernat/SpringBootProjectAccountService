@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  actions: read
+  security-events: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -42,6 +49,18 @@ jobs:
       if: always()
       with:
         files: build/test-results/test/*.xml
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        check_name: 'Test Results'
+        comment_mode: create new
+        
+    - name: Upload test results (fallback)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: |
+          build/test-results/test/*.xml
+          build/reports/tests/test/
         
   build:
     runs-on: ubuntu-latest

@@ -2,11 +2,24 @@ name: Quick Build
 
 on:
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip tests for faster build'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+        - 'true'
+        - 'false'
   push:
     paths:
       - 'src/**'
       - 'build.gradle'
       - 'Dockerfile'
+
+permissions:
+  contents: read
+  actions: write
 
 jobs:
   quick-build:
@@ -36,11 +49,28 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
       
-    - name: Build JAR
-      run: ./gradlew bootJar
+    - name: Build JAR with optional tests
+      run: |
+        if [ "${{ github.event.inputs.skip_tests }}" = "false" ]; then
+          echo "Running with tests..."
+          ./gradlew clean test bootJar
+        else
+          echo "Skipping tests for faster build..."
+          ./gradlew clean bootJar -x test
+        fi
       
-    - name: List generated files
-      run: ls -la build/libs/
+    - name: Verify and list generated files
+      run: |
+        echo "Generated files in build/libs/:"
+        ls -la build/libs/
+        
+        if [ -f build/libs/AccountService-0.0.1-SNAPSHOT.jar ]; then
+          echo "✅ JAR successfully created"
+          echo "File size: $(du -h build/libs/AccountService-0.0.1-SNAPSHOT.jar | cut -f1)"
+        else
+          echo "❌ JAR file not found!"
+          exit 1
+        fi
       
     - name: Upload JAR
       uses: actions/upload-artifact@v4
@@ -48,3 +78,10 @@ jobs:
         name: quick-jar-${{ github.sha }}
         path: build/libs/*.jar
         retention-days: 5
+        
+    - name: Build summary
+      run: |
+        echo "🚀 Quick build completed!"
+        echo "📦 JAR artifact: AccountService-0.0.1-SNAPSHOT.jar"
+        echo "⏱️  Build time: $(date)"
+        echo "🔧 Tests skipped: ${{ github.event.inputs.skip_tests || 'true' }}"

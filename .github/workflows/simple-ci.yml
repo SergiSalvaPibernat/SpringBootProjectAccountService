@@ -1,0 +1,176 @@
+name: Simple CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, AcServiceNewURL ]
+  pull_request:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    name: Build and Test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      
+    - name: Run tests and build
+      run: ./gradlew clean test bootJar
+      
+    - name: Display test results
+      if: always()
+      run: |
+        echo "Test Results Summary:"
+        if [ -f build/test-results/test/TEST-*.xml ]; then
+          echo "✅ Test result files found"
+          ls -la build/test-results/test/
+          
+          # Simple test result parsing
+          if grep -q 'failures="0"' build/test-results/test/TEST-*.xml; then
+            echo "✅ All tests passed!"
+          else
+            echo "❌ Some tests failed - check detailed results"
+            grep -E '(failures=|errors=)' build/test-results/test/TEST-*.xml || true
+          fi
+        else
+          echo "❌ No test result files found"
+        fi
+        
+    - name: Verify JAR creation
+      run: |
+        echo "Generated JAR files:"
+        ls -la build/libs/
+        if [ -f build/libs/AccountService-0.0.1-SNAPSHOT.jar ]; then
+          echo "✅ JAR file successfully created"
+          echo "JAR size: $(du -h build/libs/AccountService-0.0.1-SNAPSHOT.jar | cut -f1)"
+        else
+          echo "❌ JAR file not found"
+          exit 1
+        fi
+        
+    - name: Upload JAR artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: jar-artifact-${{ github.sha }}
+        path: build/libs/*.jar
+        retention-days: 30
+        
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports-${{ github.sha }}
+        path: |
+          build/test-results/test/*.xml
+          build/reports/tests/test/
+        retention-days: 14
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    name: Build Docker Image
+    if: success()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download JAR artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: jar-artifact-${{ github.sha }}
+        path: build/libs/
+        
+    - name: Verify downloaded JAR
+      run: |
+        echo "Downloaded files:"
+        ls -la build/libs/
+        
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build Docker image
+      run: |
+        echo "Building Docker image..."
+        docker build -t accountservice:${{ github.sha }} .
+        docker build -t accountservice:latest .
+        
+    - name: Test Docker image
+      run: |
+        echo "Testing Docker image..."
+        # Start container in background
+        docker run -d --name test-container -p 8081:8081 accountservice:latest
+        sleep 10
+        
+        # Basic health check (adjust URL based on your app)
+        if docker ps | grep test-container; then
+          echo "✅ Container is running"
+          docker logs test-container
+        else
+          echo "❌ Container failed to start"
+          docker logs test-container
+          exit 1
+        fi
+        
+        # Cleanup
+        docker stop test-container
+        docker rm test-container
+        
+    - name: Save Docker image
+      run: |
+        docker save accountservice:latest | gzip > accountservice-${{ github.sha }}.tar.gz
+        echo "Docker image saved as: accountservice-${{ github.sha }}.tar.gz"
+        ls -lh accountservice-${{ github.sha }}.tar.gz
+        
+    - name: Upload Docker image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-image-${{ github.sha }}
+        path: accountservice-${{ github.sha }}.tar.gz
+        retention-days: 7
+
+  deployment-ready:
+    runs-on: ubuntu-latest
+    needs: [build-and-test, docker-build]
+    name: Deployment Ready Check
+    if: success()
+    
+    steps:
+    - name: Deployment Summary
+      run: |
+        echo "🎉 Build and Docker image creation successful!"
+        echo ""
+        echo "📦 Artifacts created:"
+        echo "  - JAR file: AccountService-0.0.1-SNAPSHOT.jar"
+        echo "  - Docker image: accountservice:latest"
+        echo ""
+        echo "✅ Ready for deployment!"
+        echo ""
+        echo "To deploy:"
+        echo "1. Download the Docker image artifact"
+        echo "2. Load it with: docker load < accountservice-${{ github.sha }}.tar.gz"
+        echo "3. Run with: docker run -p 8081:8081 accountservice:latest"
