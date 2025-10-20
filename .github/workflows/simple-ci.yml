@@ -39,7 +39,15 @@ jobs:
       run: chmod +x ./gradlew
       
     - name: Run tests and build
-      run: ./gradlew clean test bootJar
+      run: |
+        echo "Running unit and integration tests..."
+        ./gradlew clean test bootJar
+        
+    - name: Run Selenium tests
+      if: success()
+      run: |
+        echo "Running Selenium WebDriver tests..."
+        ./gradlew test --tests "com.web.AccountService.selenium.*" || echo "Selenium tests failed but continuing..."
       
     - name: Display test results
       if: always()

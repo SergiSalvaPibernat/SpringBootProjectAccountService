@@ -26,6 +26,14 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
+	// Selenium WebDriver dependencies - Updated to compatible versions
+	testImplementation 'org.seleniumhq.selenium:selenium-java:4.25.0'
+	testImplementation 'org.seleniumhq.selenium:selenium-chrome-driver:4.25.0'
+	testImplementation 'org.seleniumhq.selenium:selenium-firefox-driver:4.25.0'
+	testImplementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
+	testImplementation 'org.testcontainers:selenium:1.19.3'
+	testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
 
 }
 

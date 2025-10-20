@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.web.AccountService.integration.AccountServiceSmokeTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-10-20T15:17:01.059Z" hostname="MSI" time="0.043">
+  <properties/>
+  <testcase name="registerEndpointExists()" classname="com.web.AccountService.integration.AccountServiceSmokeTest" time="0.022"/>
+  <testcase name="healthEndpointIsAccessible()" classname="com.web.AccountService.integration.AccountServiceSmokeTest" time="0.007"/>
+  <testcase name="applicationStartsSuccessfully()" classname="com.web.AccountService.integration.AccountServiceSmokeTest" time="0.003"/>
+  <testcase name="tokenEndpointExists()" classname="com.web.AccountService.integration.AccountServiceSmokeTest" time="0.007"/>
+  <testcase name="contextLoads()" classname="com.web.AccountService.integration.AccountServiceSmokeTest" time="0.001"/>
+  <system-out><![CDATA[2025-10-20T17:17:00.525+02:00  INFO 22616 --- [AccountService] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.web.AccountService.integration.AccountServiceSmokeTest]: AccountServiceSmokeTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-10-20T17:17:00.528+02:00  INFO 22616 --- [AccountService] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.web.AccountService.AccountServiceApplication for test class com.web.AccountService.integration.AccountServiceSmokeTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.6)
+
+2025-10-20T17:17:00.572+02:00  INFO 22616 --- [AccountService] [    Test worker] c.w.A.i.AccountServiceSmokeTest          : Starting AccountServiceSmokeTest using Java 21.0.2 with PID 22616 (started by ssp_9 in C:\Users\ssp_9\Desktop\SpringBoot Project different repositories\SpringBootProjectAccountService)
+2025-10-20T17:17:00.572+02:00 DEBUG 22616 --- [AccountService] [    Test worker] c.w.A.i.AccountServiceSmokeTest          : Running with Spring Boot v3.5.6, Spring v6.2.11
+2025-10-20T17:17:00.572+02:00  INFO 22616 --- [AccountService] [    Test worker] c.w.A.i.AccountServiceSmokeTest          : The following 1 profile is active: "test"
+2025-10-20T17:17:00.853+02:00  INFO 22616 --- [AccountService] [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 0 (http)
+2025-10-20T17:17:00.855+02:00  INFO 22616 --- [AccountService] [    Test worker] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-10-20T17:17:00.855+02:00  INFO 22616 --- [AccountService] [    Test worker] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.46]
+2025-10-20T17:17:00.911+02:00  INFO 22616 --- [AccountService] [    Test worker] o.a.c.c.C.[.[localhost].[/account]       : Initializing Spring embedded WebApplicationContext
+2025-10-20T17:17:00.911+02:00  INFO 22616 --- [AccountService] [    Test worker] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 335 ms
+2025-10-20T17:17:01.004+02:00  INFO 22616 --- [AccountService] [    Test worker] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name users
+2025-10-20T17:17:01.054+02:00  INFO 22616 --- [AccountService] [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 56985 (http) with context path '/account'
+2025-10-20T17:17:01.057+02:00  INFO 22616 --- [AccountService] [    Test worker] c.w.A.i.AccountServiceSmokeTest          : Started AccountServiceSmokeTest in 0.523 seconds (process running for 6.557)
+2025-10-20T17:17:01.065+02:00  INFO 22616 --- [AccountService] [o-auto-2-exec-1] o.a.c.c.C.[.[localhost].[/account]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-10-20T17:17:01.065+02:00  INFO 22616 --- [AccountService] [o-auto-2-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-10-20T17:17:01.066+02:00  INFO 22616 --- [AccountService] [o-auto-2-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-10-20T17:17:01.076+02:00  WARN 22616 --- [AccountService] [o-auto-2-exec-1] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
+2025-10-20T17:17:01.098+02:00  WARN 22616 --- [AccountService] [o-auto-2-exec-3] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
